@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lời Giải — Lập Trình Hướng Đối Tượng</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2333;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --accent2: #f78166;
+    --accent3: #3fb950;
+    --accent4: #d2a8ff;
+    --accent5: #ffa657;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --keyword: #ff7b72;
+    --string: #a5d6ff;
+    --comment: #6a737d;
+    --func: #d2a8ff;
+    --number: #79c0ff;
+    --cls: #ffa657;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(88,166,255,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 80%, rgba(210,168,255,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    margin-bottom: 56px;
+    animation: fadeDown 0.7s ease both;
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(88,166,255,0.12);
+    border: 1px solid rgba(88,166,255,0.3);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 16px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #e6edf3 30%, #58a6ff 80%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 16px;
+    font-weight: 300;
+  }
+
+  /* EXERCISE CARD */
+  .ex-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 32px;
+    overflow: hidden;
+    animation: fadeUp 0.6s ease both;
+    transition: border-color 0.3s;
+  }
+
+  .ex-card:hover { border-color: rgba(88,166,255,0.4); }
+  .ex-card:nth-child(1) { animation-delay: 0.05s; }
+  .ex-card:nth-child(2) { animation-delay: 0.1s; }
+  .ex-card:nth-child(3) { animation-delay: 0.15s; }
+  .ex-card:nth-child(4) { animation-delay: 0.2s; }
+  .ex-card:nth-child(5) { animation-delay: 0.25s; }
+  .ex-card:nth-child(6) { animation-delay: 0.3s; }
+
+  .ex-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+
+  .ex-header:hover { background: rgba(255,255,255,0.02); }
+
+  .ex-num {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .c1 .ex-num { background: rgba(88,166,255,0.15); color: var(--accent); }
+  .c2 .ex-num { background: rgba(63,185,80,0.15); color: var(--accent3); }
+  .c3 .ex-num { background: rgba(210,168,255,0.15); color: var(--accent4); }
+  .c4 .ex-num { background: rgba(247,129,102,0.15); color: var(--accent2); }
+  .c5 .ex-num { background: rgba(255,166,87,0.15); color: var(--accent5); }
+  .c6 .ex-num { background: rgba(88,166,255,0.15); color: var(--accent); }
+
+  .ex-title { font-size: 17px; font-weight: 600; flex: 1; }
+  .ex-tag {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.06);
+    color: var(--muted);
+  }
+
+  .chevron {
+    color: var(--muted);
+    transition: transform 0.3s;
+    font-size: 18px;
+  }
+
+  .ex-card.open .chevron { transform: rotate(180deg); }
+
+  .ex-body { display: none; padding: 0; }
+  .ex-card.open .ex-body { display: block; }
+
+  /* DESCRIPTION */
+  .desc-block {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.01);
+  }
+
+  .desc-block p {
+    color: #b8c4ce;
+    font-size: 14.5px;
+    line-height: 1.7;
+    margin-bottom: 8px;
+  }
+
+  .desc-block p:last-child { margin-bottom: 0; }
+
+  .req-list {
+    list-style: none;
+    margin-top: 10px;
+  }
+
+  .req-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 5px 0;
+    font-size: 14px;
+    color: #b8c4ce;
+  }
+
+  .req-list li::before {
+    content: '▸';
+    color: var(--accent);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* CODE BLOCK */
+  .code-wrap {
+    position: relative;
+  }
+
+  .code-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: rgba(0,0,0,0.3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-label span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .copy-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+    font-family: 'Outfit', sans-serif;
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .copy-btn:hover { background: rgba(88,166,255,0.1); color: var(--accent); border-color: var(--accent); }
+
+  pre {
+    margin: 0;
+    padding: 20px 24px 24px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.75;
+    background: transparent;
+  }
+
+  /* Syntax highlight */
+  .kw { color: var(--keyword); font-weight: 600; }
+  .fn { color: var(--func); }
+  .st { color: var(--string); }
+  .cm { color: var(--comment); font-style: italic; }
+  .nm { color: var(--number); }
+  .cl { color: var(--cls); font-weight: 600; }
+  .op { color: #79c0ff; }
+  .slf { color: #e6edf3; font-style: italic; }
+
+  /* OUTPUT */
+  .output-block {
+    border-top: 1px solid var(--border);
+    padding: 16px 24px;
+    background: rgba(63,185,80,0.03);
+  }
+
+  .output-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent3);
+    margin-bottom: 10px;
+  }
+
+  .output-block pre {
+    padding: 12px 16px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 8px;
+    border: 1px solid rgba(63,185,80,0.15);
+    font-size: 13px;
+    color: #b5f0bc;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="badge">Python OOP</div>
+    <h1>Lời Giải Bài Tập<br>Lập Trình Hướng Đối Tượng</h1>
+    <p class="subtitle">6 bài tập từ cơ bản đến nâng cao · Click vào từng bài để mở</p>
+  </header>
+
+  <!-- ===== BÀI 1 ===== -->
+  <div class="ex-card c1 open" id="ex1">
+    <div class="ex-header" onclick="toggle('ex1')">
+      <div class="ex-num">1</div>
+      <div class="ex-title">Lớp Point — 2D Geometry</div>
+      <span class="ex-tag">Class · Method</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="ex-body">
+      <div class="desc-block">
+        <p>Tạo lớp <strong>Point</strong> với thuộc tính <code>x</code>, <code>y</code> kiểu int. Thực hiện:</p>
+        <ul class="req-list">
+          <li>Tạo điểm A(3, 4) → hiển thị tọa độ</li>
+          <li>Tạo điểm B từ bàn phím</li>
+          <li>Tạo điểm C đối xứng với B qua gốc O</li>
+          <li>Tính khoảng cách từ B đến O: d = √(x² + y²)</li>
+          <li>Tính khoảng cách từ A đến B: d = √((x₁−x₂)² + (y₁−y₂)²)</li>
+        </ul>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label">
+          <span>point.py</span>
+          <button class="copy-btn" onclick="copyCode('code1')">Copy</button>
+        </div>
+        <pre id="code1"><span class="kw">import</span> math
+
+<span class="kw">class</span> <span class="cl">Point</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, x: <span class="cl">int</span>, y: <span class="cl">int</span>):
+        <span class="slf">self</span>.x = x
+        <span class="slf">self</span>.y = y
+
+    <span class="kw">def</span> <span class="fn">hien_thi</span>(<span class="slf">self</span>):
+        <span class="kw">print</span>(<span class="st">f"Điểm ({self.x}, {self.y})"</span>)
+
+    <span class="kw">def</span> <span class="fn">doi_xung_qua_O</span>(<span class="slf">self</span>):
+        <span class="cm"># Điểm đối xứng qua gốc O: (-x, -y)</span>
+        <span class="kw">return</span> <span class="cl">Point</span>(-<span class="slf">self</span>.x, -<span class="slf">self</span>.y)
+
+    <span class="kw">def</span> <span class="fn">khoang_cach_den_O</span>(<span class="slf">self</span>):
+        <span class="kw">return</span> math.sqrt(<span class="slf">self</span>.x**<span class="nm">2</span> + <span class="slf">self</span>.y**<span class="nm">2</span>)
+
+    <span class="kw">def</span> <span class="fn">khoang_cach_den</span>(<span class="slf">self</span>, other):
+        <span class="kw">return</span> math.sqrt((<span class="slf">self</span>.x - other.x)**<span class="nm">2</span> + (<span class="slf">self</span>.y - other.y)**<span class="nm">2</span>)
+
+
+<span class="cm"># ---- Tạo điểm A(3, 4) ----</span>
+A = <span class="cl">Point</span>(<span class="nm">3</span>, <span class="nm">4</span>)
+<span class="kw">print</span>(<span class="st">"Điểm A:"</span>); A.hien_thi()
+
+<span class="cm"># ---- Nhập điểm B từ bàn phím ----</span>
+xb = <span class="cl">int</span>(<span class="kw">input</span>(<span class="st">"Nhập x của B: "</span>))
+yb = <span class="cl">int</span>(<span class="kw">input</span>(<span class="st">"Nhập y của B: "</span>))
+B = <span class="cl">Point</span>(xb, yb)
+<span class="kw">print</span>(<span class="st">"Điểm B:"</span>); B.hien_thi()
+
+<span class="cm"># ---- Điểm C đối xứng với B qua O ----</span>
+C = B.doi_xung_qua_O()
+<span class="kw">print</span>(<span class="st">"Điểm C (đối xứng B qua O):"</span>); C.hien_thi()
+
+<span class="cm"># ---- Khoảng cách B → O ----</span>
+<span class="kw">print</span>(<span class="st">f"Khoảng cách B đến O: {B.khoang_cach_den_O():.2f}"</span>)
+
+<span class="cm"># ---- Khoảng cách A → B ----</span>
+<span class="kw">print</span>(<span class="st">f"Khoảng cách A đến B: {A.khoang_cach_den(B):.2f}"</span>)</pre>
+      </div>
+      <div class="output-block">
+        <div class="output-label">▶ Kết quả mẫu (B = 1, 2)</div>
+        <pre>Điểm A: (3, 4)
+Điểm B: (1, 2)
+Điểm C (đối xứng B qua O): (-1, -2)
+Khoảng cách B đến O: 2.24
+Khoảng cách A đến B: 2.83</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BÀI 2 ===== -->
+  <div class="ex-card c2" id="ex2">
+    <div class="ex-header" onclick="toggle('ex2')">
+      <div class="ex-num">2</div>
+      <div class="ex-title">Lớp Siêu Nhân</div>
+      <span class="ex-tag">Class · Object</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="ex-body">
+      <div class="desc-block">
+        <p>Tạo lớp <strong>SieuNhan</strong> với thuộc tính: <code>ten</code>, <code>vu_khi</code>, <code>mau_sac</code>. Khởi tạo 2 đối tượng và in ra thể hiện của cả hai.</p>
+        <ul class="req-list">
+          <li>sieu_nhan_A: tên A, kiếm, màu đỏ</li>
+          <li>sieu_nhan_B: tên B, khiên, màu xanh</li>
+        </ul>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label">
+          <span>sieunhan.py</span>
+          <button class="copy-btn" onclick="copyCode('code2')">Copy</button>
+        </div>
+        <pre id="code2"><span class="kw">class</span> <span class="cl">SieuNhan</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, ten: <span class="cl">str</span>, vu_khi: <span class="cl">str</span>, mau_sac: <span class="cl">str</span>):
+        <span class="slf">self</span>.ten     = ten
+        <span class="slf">self</span>.vu_khi  = vu_khi
+        <span class="slf">self</span>.mau_sac = mau_sac
+
+    <span class="kw">def</span> <span class="fn">__str__</span>(<span class="slf">self</span>):
+        <span class="kw">return</span> (<span class="st">f"Siêu nhân {self.ten} | "</span>
+                <span class="st">f"Vũ khí: {self.vu_khi} | "</span>
+                <span class="st">f"Màu sắc: {self.mau_sac}"</span>)
+
+
+<span class="cm"># ---- Khởi tạo 2 đối tượng ----</span>
+sieu_nhan_A = <span class="cl">SieuNhan</span>(<span class="st">"A"</span>, <span class="st">"kiếm"</span>, <span class="st">"đỏ"</span>)
+sieu_nhan_B = <span class="cl">SieuNhan</span>(<span class="st">"B"</span>, <span class="st">"khiên"</span>, <span class="st">"xanh"</span>)
+
+<span class="cm"># ---- In ra thể hiện ----</span>
+<span class="kw">print</span>(sieu_nhan_A)
+<span class="kw">print</span>(sieu_nhan_B)</pre>
+      </div>
+      <div class="output-block">
+        <div class="output-label">▶ Kết quả</div>
+        <pre>Siêu nhân A | Vũ khí: kiếm | Màu sắc: đỏ
+Siêu nhân B | Vũ khí: khiên | Màu sắc: xanh</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BÀI 3 ===== -->
+  <div class="ex-card c3" id="ex3">
+    <div class="ex-header" onclick="toggle('ex3')">
+      <div class="ex-num">3</div>
+      <div class="ex-title">Quản Lý Danh Sách Siêu Nhân</div>
+      <span class="ex-tag">While · For · List</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="ex-body">
+      <div class="desc-block">
+        <p>Chương trình quản lý siêu nhân toàn thế giới:</p>
+        <ul class="req-list">
+          <li>Khởi tạo class siêu nhân (thuộc tính tùy chọn)</li>
+          <li>Dùng <strong>while</strong> để nhập danh sách</li>
+          <li>Dùng <strong>for</strong> để in danh sách kèm thuộc tính</li>
+        </ul>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label">
+          <span>ds_sieunhan.py</span>
+          <button class="copy-btn" onclick="copyCode('code3')">Copy</button>
+        </div>
+        <pre id="code3"><span class="kw">class</span> <span class="cl">SieuNhan</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, ten=<span class="st">""</span>, vu_khi=<span class="st">""</span>, mau_sac=<span class="st">""</span>, suc_manh=<span class="nm">0</span>):
+        <span class="slf">self</span>.ten      = ten
+        <span class="slf">self</span>.vu_khi   = vu_khi
+        <span class="slf">self</span>.mau_sac  = mau_sac
+        <span class="slf">self</span>.suc_manh = suc_manh
+
+    <span class="kw">def</span> <span class="fn">__str__</span>(<span class="slf">self</span>):
+        <span class="kw">return</span> (<span class="st">f"  ✦ {self.ten:10} | Vũ khí: {self.vu_khi:8} | "</span>
+                <span class="st">f"Màu: {self.mau_sac:8} | Sức mạnh: {self.suc_manh}"</span>)
+
+
+<span class="cm"># ---- Nhập danh sách bằng while ----</span>
+danh_sach = []
+<span class="kw">print</span>(<span class="st">"=== NHẬP DANH SÁCH SIÊU NHÂN ==="</span>)
+<span class="kw">print</span>(<span class="st">"(Nhấn Enter để kết thúc)\n"</span>)
+
+<span class="kw">while</span> <span class="cl">True</span>:
+    ten = <span class="kw">input</span>(<span class="st">"Tên siêu nhân: "</span>)
+    <span class="kw">if</span> ten == <span class="st">""</span>:
+        <span class="kw">break</span>
+    vu_khi  = <span class="kw">input</span>(<span class="st">"Vũ khí: "</span>)
+    mau_sac = <span class="kw">input</span>(<span class="st">"Màu sắc: "</span>)
+    suc_manh = <span class="cl">int</span>(<span class="kw">input</span>(<span class="st">"Sức mạnh (1-100): "</span>))
+    danh_sach.append(<span class="cl">SieuNhan</span>(ten, vu_khi, mau_sac, suc_manh))
+    <span class="kw">print</span>(<span class="st">f"  → Đã thêm {ten}!\n"</span>)
+
+<span class="cm"># ---- In danh sách bằng for ----</span>
+<span class="kw">print</span>(<span class="st">f"\n=== DANH SÁCH {len(danh_sach)} SIÊU NHÂN ==="</span>)
+<span class="kw">for</span> i, sn <span class="kw">in</span> <span class="fn">enumerate</span>(danh_sach, <span class="nm">1</span>):
+    <span class="kw">print</span>(<span class="st">f"{i}."</span>, sn)</pre>
+      </div>
+      <div class="output-block">
+        <div class="output-label">▶ Kết quả mẫu</div>
+        <pre>=== DANH SÁCH 2 SIÊU NHÂN ===
+1.   ✦ Flash      | Vũ khí: tốc độ  | Màu: đỏ      | Sức mạnh: 90
+2.   ✦ Superman   | Vũ khí: thân    | Màu: xanh    | Sức mạnh: 99</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BÀI 4 ===== -->
+  <div class="ex-card c4" id="ex4">
+    <div class="ex-header" onclick="toggle('ex4')">
+      <div class="ex-num">4</div>
+      <div class="ex-title">Nhận Diện Lớp Từ Thực Tế</div>
+      <span class="ex-tag">3 Classes · OOP</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="ex-body">
+      <div class="desc-block">
+        <p>Xây dựng 3 lớp từ thực tế: <strong>ConCho</strong>, <strong>OTo</strong>, <strong>TaiKhoan</strong>, mỗi lớp có đầy đủ thuộc tính và phương thức đặc trưng.</p>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label">
+          <span>thuc_te.py</span>
+          <button class="copy-btn" onclick="copyCode('code4')">Copy</button>
+        </div>
+        <pre id="code4"><span class="cm"># =========================================================
+# LỚP 1: CON CHÓ
+# =========================================================</span>
+<span class="kw">class</span> <span class="cl">ConCho</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, ten, mau_sac, giong, cam_xuc=<span class="st">"vui"</span>):
+        <span class="slf">self</span>.ten      = ten
+        <span class="slf">self</span>.mau_sac  = mau_sac
+        <span class="slf">self</span>.giong    = giong
+        <span class="slf">self</span>.cam_xuc  = cam_xuc
+
+    <span class="kw">def</span> <span class="fn">sua</span>(<span class="slf">self</span>):
+        <span class="kw">print</span>(<span class="st">f"{self.ten}: Gâu gâu! 🐕"</span>)
+
+    <span class="kw">def</span> <span class="fn">vay_duoi</span>(<span class="slf">self</span>):
+        <span class="kw">print</span>(<span class="st">f"{self.ten} vẫy đuôi vì {self.cam_xuc}!"</span>)
+
+    <span class="kw">def</span> <span class="fn">an</span>(<span class="slf">self</span>, thuc_an):
+        <span class="kw">print</span>(<span class="st">f"{self.ten} đang ăn {thuc_an}. Ngon!"</span>)
+
+    <span class="kw">def</span> <span class="fn">chay</span>(<span class="slf">self</span>, toc_do):
+        <span class="kw">print</span>(<span class="st">f"{self.ten} chạy với tốc độ {toc_do} km/h!"</span>)
+
+
+<span class="cm"># =========================================================
+# LỚP 2: Ô TÔ
+# =========================================================</span>
+<span class="kw">class</span> <span class="cl">OTo</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, hang, kich_thuoc, mau, gia):
+        <span class="slf">self</span>.hang       = hang
+        <span class="slf">self</span>.kich_thuoc = kich_thuoc
+        <span class="slf">self</span>.mau        = mau
+        <span class="slf">self</span>.gia        = gia
+        <span class="slf">self</span>.toc_do     = <span class="nm">0</span>
+
+    <span class="kw">def</span> <span class="fn">tang_toc</span>(<span class="slf">self</span>, them):
+        <span class="slf">self</span>.toc_do += them
+        <span class="kw">print</span>(<span class="st">f"Tăng tốc! Tốc độ hiện tại: {self.toc_do} km/h"</span>)
+
+    <span class="kw">def</span> <span class="fn">giam_toc</span>(<span class="slf">self</span>, bot):
+        <span class="slf">self</span>.toc_do = <span class="fn">max</span>(<span class="nm">0</span>, <span class="slf">self</span>.toc_do - bot)
+        <span class="kw">print</span>(<span class="st">f"Giảm tốc! Tốc độ hiện tại: {self.toc_do} km/h"</span>)
+
+    <span class="kw">def</span> <span class="fn">dam</span>(<span class="slf">self</span>):
+        <span class="kw">print</span>(<span class="st">f"💥 Xe {self.hang} bị đâm! Dừng khẩn cấp."</span>)
+        <span class="slf">self</span>.toc_do = <span class="nm">0</span>
+
+
+<span class="cm"># =========================================================
+# LỚP 3: TÀI KHOẢN NGÂN HÀNG
+# =========================================================</span>
+<span class="kw">class</span> <span class="cl">TaiKhoan</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, ten_tk, so_tk, ngan_hang, so_du=<span class="nm">0</span>):
+        <span class="slf">self</span>.ten_tk    = ten_tk
+        <span class="slf">self</span>.so_tk     = so_tk
+        <span class="slf">self</span>.ngan_hang = ngan_hang
+        <span class="slf">self</span>.__so_du   = so_du  <span class="cm"># thuộc tính private</span>
+
+    <span class="kw">def</span> <span class="fn">rut</span>(<span class="slf">self</span>, so_tien):
+        <span class="kw">if</span> so_tien > <span class="slf">self</span>.__so_du:
+            <span class="kw">print</span>(<span class="st">"❌ Số dư không đủ!"</span>)
+        <span class="kw">else</span>:
+            <span class="slf">self</span>.__so_du -= so_tien
+            <span class="kw">print</span>(<span class="st">f"✅ Rút {so_tien:,} VNĐ. Số dư còn: {self.__so_du:,}"</span>)
+
+    <span class="kw">def</span> <span class="fn">gui</span>(<span class="slf">self</span>, so_tien):
+        <span class="slf">self</span>.__so_du += so_tien
+        <span class="kw">print</span>(<span class="st">f"✅ Gửi {so_tien:,} VNĐ. Số dư mới: {self.__so_du:,}"</span>)
+
+    <span class="kw">def</span> <span class="fn">kiem_tra_so_du</span>(<span class="slf">self</span>):
+        <span class="kw">print</span>(<span class="st">f"💳 [{self.ten_tk}] Số dư: {self.__so_du:,} VNĐ"</span>)
+
+
+<span class="cm"># ---- Demo ----</span>
+cho = <span class="cl">ConCho</span>(<span class="st">"Milo"</span>, <span class="st">"vàng"</span>, <span class="st">"Golden Retriever"</span>)
+cho.sua(); cho.an(<span class="st">"xương"</span>)
+
+xe = <span class="cl">OTo</span>(<span class="st">"Toyota"</span>, <span class="st">"sedan"</span>, <span class="st">"trắng"</span>, <span class="nm">800_000_000</span>)
+xe.tang_toc(<span class="nm">60</span>); xe.tang_toc(<span class="nm">40</span>); xe.giam_toc(<span class="nm">30</span>)
+
+tk = <span class="cl">TaiKhoan</span>(<span class="st">"Nguyễn Văn A"</span>, <span class="st">"123456789"</span>, <span class="st">"Vietcombank"</span>, <span class="nm">5_000_000</span>)
+tk.gui(<span class="nm">2_000_000</span>); tk.rut(<span class="nm">3_000_000</span>); tk.kiem_tra_so_du()</pre>
+      </div>
+      <div class="output-block">
+        <div class="output-label">▶ Kết quả</div>
+        <pre>Milo: Gâu gâu! 🐕
+Milo đang ăn xương. Ngon!
+Tăng tốc! Tốc độ hiện tại: 60 km/h
+Tăng tốc! Tốc độ hiện tại: 100 km/h
+Giảm tốc! Tốc độ hiện tại: 70 km/h
+✅ Gửi 2,000,000 VNĐ. Số dư mới: 7,000,000
+✅ Rút 3,000,000 VNĐ. Số dư còn: 4,000,000
+💳 [Nguyễn Văn A] Số dư: 4,000,000 VNĐ</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BÀI 5 ===== -->
+  <div class="ex-card c5" id="ex5">
+    <div class="ex-header" onclick="toggle('ex5')">
+      <div class="ex-num">5</div>
+      <div class="ex-title">Think Python — Circle Class</div>
+      <span class="ex-tag">Chapter 15 · Exercise 15.1</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="ex-body">
+      <div class="desc-block">
+        <p>Xây dựng lớp <strong>Circle</strong> với <code>center</code> (Point) và <code>radius</code> (float). Viết các hàm:</p>
+        <ul class="req-list">
+          <li><code>point_in_circle</code>: kiểm tra điểm có nằm trong/trên vòng tròn không</li>
+          <li><code>rect_in_circle</code>: kiểm tra hình chữ nhật có nằm hoàn toàn trong vòng tròn không</li>
+          <li><code>rect_circle_overlap</code>: kiểm tra hình chữ nhật có giao với vòng tròn không</li>
+        </ul>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label">
+          <span>circle.py</span>
+          <button class="copy-btn" onclick="copyCode('code5')">Copy</button>
+        </div>
+        <pre id="code5"><span class="kw">import</span> math
+
+<span class="kw">class</span> <span class="cl">Point</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, x=<span class="nm">0.0</span>, y=<span class="nm">0.0</span>):
+        <span class="slf">self</span>.x = x
+        <span class="slf">self</span>.y = y
+
+<span class="kw">class</span> <span class="cl">Rectangle</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, corner: <span class="cl">Point</span>, width: <span class="cl">float</span>, height: <span class="cl">float</span>):
+        <span class="slf">self</span>.corner = corner   <span class="cm"># góc dưới-trái</span>
+        <span class="slf">self</span>.width  = width
+        <span class="slf">self</span>.height = height
+
+<span class="kw">class</span> <span class="cl">Circle</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, center: <span class="cl">Point</span>, radius: <span class="cl">float</span>):
+        <span class="slf">self</span>.center = center
+        <span class="slf">self</span>.radius = radius
+
+
+<span class="kw">def</span> <span class="fn">distance</span>(p1: <span class="cl">Point</span>, p2: <span class="cl">Point</span>) -> <span class="cl">float</span>:
+    <span class="kw">return</span> math.sqrt((p1.x - p2.x)**<span class="nm">2</span> + (p1.y - p2.y)**<span class="nm">2</span>)
+
+
+<span class="kw">def</span> <span class="fn">point_in_circle</span>(circle: <span class="cl">Circle</span>, point: <span class="cl">Point</span>) -> <span class="cl">bool</span>:
+    <span class="cm">"""True nếu điểm nằm trong hoặc trên vòng tròn."""</span>
+    <span class="kw">return</span> <span class="fn">distance</span>(circle.center, point) <= circle.radius
+
+
+<span class="kw">def</span> <span class="fn">rect_in_circle</span>(circle: <span class="cl">Circle</span>, rect: <span class="cl">Rectangle</span>) -> <span class="cl">bool</span>:
+    <span class="cm">"""True nếu HCN nằm hoàn toàn trong/trên vòng tròn."""</span>
+    c = rect.corner
+    corners = [
+        <span class="cl">Point</span>(c.x,              c.y),
+        <span class="cl">Point</span>(c.x + rect.width, c.y),
+        <span class="cl">Point</span>(c.x,              c.y + rect.height),
+        <span class="cl">Point</span>(c.x + rect.width, c.y + rect.height),
+    ]
+    <span class="kw">return</span> <span class="fn">all</span>(<span class="fn">point_in_circle</span>(circle, p) <span class="kw">for</span> p <span class="kw">in</span> corners)
+
+
+<span class="kw">def</span> <span class="fn">rect_circle_overlap</span>(circle: <span class="cl">Circle</span>, rect: <span class="cl">Rectangle</span>) -> <span class="cl">bool</span>:
+    <span class="cm">"""True nếu bất kỳ góc nào của HCN nằm trong vòng tròn."""</span>
+    c = rect.corner
+    corners = [
+        <span class="cl">Point</span>(c.x,              c.y),
+        <span class="cl">Point</span>(c.x + rect.width, c.y),
+        <span class="cl">Point</span>(c.x,              c.y + rect.height),
+        <span class="cl">Point</span>(c.x + rect.width, c.y + rect.height),
+    ]
+    <span class="kw">return</span> <span class="fn">any</span>(<span class="fn">point_in_circle</span>(circle, p) <span class="kw">for</span> p <span class="kw">in</span> corners)
+
+
+<span class="cm"># ---- Demo ----</span>
+circle = <span class="cl">Circle</span>(<span class="cl">Point</span>(<span class="nm">150</span>, <span class="nm">100</span>), <span class="nm">75</span>)
+
+p1 = <span class="cl">Point</span>(<span class="nm">150</span>, <span class="nm">100</span>)   <span class="cm"># tâm → trong</span>
+p2 = <span class="cl">Point</span>(<span class="nm">300</span>, <span class="nm">300</span>)   <span class="cm"># xa → ngoài</span>
+<span class="kw">print</span>(<span class="st">f"p1 trong vòng tròn: {point_in_circle(circle, p1)}"</span>)
+<span class="kw">print</span>(<span class="st">f"p2 trong vòng tròn: {point_in_circle(circle, p2)}"</span>)
+
+rect_small = <span class="cl">Rectangle</span>(<span class="cl">Point</span>(<span class="nm">140</span>, <span class="nm">90</span>), <span class="nm">10</span>, <span class="nm">10</span>)
+rect_large = <span class="cl">Rectangle</span>(<span class="cl">Point</span>(<span class="nm">100</span>, <span class="nm">50</span>), <span class="nm">300</span>, <span class="nm">200</span>)
+<span class="kw">print</span>(<span class="st">f"rect_small trong circle: {rect_in_circle(circle, rect_small)}"</span>)
+<span class="kw">print</span>(<span class="st">f"rect_large overlap circle: {rect_circle_overlap(circle, rect_large)}"</span>)</pre>
+      </div>
+      <div class="output-block">
+        <div class="output-label">▶ Kết quả</div>
+        <pre>p1 trong vòng tròn: True
+p2 trong vòng tròn: False
+rect_small trong circle: True
+rect_large overlap circle: True</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BÀI 6 ===== -->
+  <div class="ex-card c6" id="ex6">
+    <div class="ex-header" onclick="toggle('ex6')">
+      <div class="ex-num">6</div>
+      <div class="ex-title">Bài Tập Nâng Cao — Lớp NhanVien</div>
+      <span class="ex-tag">Advanced · Getter/Setter</span>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="ex-body">
+      <div class="desc-block">
+        <p>Xây dựng lớp <strong>NhanVien</strong> với đầy đủ getter/setter và các nghiệp vụ:</p>
+        <ul class="req-list">
+          <li><code>tinhLuong()</code>: Lương = luongCoban × heSoLuong</li>
+          <li><code>inTTin()</code>: Hiển thị đầy đủ thông tin nhân viên</li>
+          <li><code>tangLuong(delta)</code>: Nếu lương mới > LUONG_MAX → in cảnh báo, trả False; ngược lại trả True</li>
+          <li>Getter/setter cho tất cả thuộc tính</li>
+        </ul>
+      </div>
+      <div class="code-wrap">
+        <div class="code-label">
+          <span>nhanvien.py</span>
+          <button class="copy-btn" onclick="copyCode('code6')">Copy</button>
+        </div>
+        <pre id="code6"><span class="kw">class</span> <span class="cl">NhanVien</span>:
+    LUONG_MAX = <span class="nm">50_000_000</span>  <span class="cm"># Class variable (static)</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="slf">self</span>, ten_nhan_vien: <span class="cl">str</span>,
+                 luong_co_ban: <span class="cl">float</span>, he_so_luong: <span class="cl">float</span>):
+        <span class="slf">self</span>.__tenNhanVien  = ten_nhan_vien
+        <span class="slf">self</span>.__luongCoBan   = luong_co_ban
+        <span class="slf">self</span>.__heSoLuong    = he_so_luong
+
+    <span class="cm"># ── Getter / Setter ─────────────────────────────────</span>
+    <span class="op">@property</span>
+    <span class="kw">def</span> <span class="fn">tenNhanVien</span>(<span class="slf">self</span>): <span class="kw">return</span> <span class="slf">self</span>.__tenNhanVien
+
+    <span class="op">@tenNhanVien</span>.setter
+    <span class="kw">def</span> <span class="fn">tenNhanVien</span>(<span class="slf">self</span>, value):
+        <span class="kw">if</span> <span class="kw">not</span> value.strip():
+            <span class="kw">raise</span> <span class="cl">ValueError</span>(<span class="st">"Tên không được rỗng!"</span>)
+        <span class="slf">self</span>.__tenNhanVien = value
+
+    <span class="op">@property</span>
+    <span class="kw">def</span> <span class="fn">luongCoBan</span>(<span class="slf">self</span>): <span class="kw">return</span> <span class="slf">self</span>.__luongCoBan
+
+    <span class="op">@luongCoBan</span>.setter
+    <span class="kw">def</span> <span class="fn">luongCoBan</span>(<span class="slf">self</span>, value):
+        <span class="kw">if</span> value < <span class="nm">0</span>:
+            <span class="kw">raise</span> <span class="cl">ValueError</span>(<span class="st">"Lương không được âm!"</span>)
+        <span class="slf">self</span>.__luongCoBan = value
+
+    <span class="op">@property</span>
+    <span class="kw">def</span> <span class="fn">heSoLuong</span>(<span class="slf">self</span>): <span class="kw">return</span> <span class="slf">self</span>.__heSoLuong
+
+    <span class="op">@heSoLuong</span>.setter
+    <span class="kw">def</span> <span class="fn">heSoLuong</span>(<span class="slf">self</span>, value):
+        <span class="kw">if</span> value <= <span class="nm">0</span>:
+            <span class="kw">raise</span> <span class="cl">ValueError</span>(<span class="st">"Hệ số lương phải > 0!"</span>)
+        <span class="slf">self</span>.__heSoLuong = value
+
+    <span class="cm"># ── Phương thức nghiệp vụ ────────────────────────────</span>
+    <span class="kw">def</span> <span class="fn">tinhLuong</span>(<span class="slf">self</span>) -> <span class="cl">float</span>:
+        <span class="kw">return</span> <span class="slf">self</span>.__luongCoBan * <span class="slf">self</span>.__heSoLuong
+
+    <span class="kw">def</span> <span class="fn">inTTin</span>(<span class="slf">self</span>):
+        luong = <span class="slf">self</span>.tinhLuong()
+        <span class="kw">print</span>(<span class="st">f"""
+╔══════════════════════════════════════╗
+║        THÔNG TIN NHÂN VIÊN           ║
+╠══════════════════════════════════════╣
+║ Tên       : {self.__tenNhanVien:<25}║
+║ Lương CB  : {self.__luongCoBan:>20,.0f} VNĐ ║
+║ Hệ số     : {self.__heSoLuong:>25.1f} ║
+║ Lương TT  : {luong:>20,.0f} VNĐ ║
+╚══════════════════════════════════════╝"""</span>)
+
+    <span class="kw">def</span> <span class="fn">tangLuong</span>(<span class="slf">self</span>, delta: <span class="cl">float</span>) -> <span class="cl">bool</span>:
+        luong_moi = (<span class="slf">self</span>.__luongCoBan + delta) * <span class="slf">self</span>.__heSoLuong
+        <span class="kw">if</span> luong_moi > <span class="cl">NhanVien</span>.LUONG_MAX:
+            <span class="kw">print</span>(<span class="st">f"⚠️  Lương mới ({luong_moi:,.0f}) vượt LUONG_MAX. Không tăng!"</span>)
+            <span class="kw">return</span> <span class="cl">False</span>
+        <span class="slf">self</span>.__luongCoBan += delta
+        <span class="kw">print</span>(<span class="st">f"✅ Đã tăng lương! Lương mới: {self.tinhLuong():,.0f} VNĐ"</span>)
+        <span class="kw">return</span> <span class="cl">True</span>
+
+
+<span class="cm"># ---- Demo ----</span>
+nv = <span class="cl">NhanVien</span>(<span class="st">"Nguyễn Văn A"</span>, <span class="nm">10_000_000</span>, <span class="nm">3.0</span>)
+nv.inTTin()
+nv.tangLuong(<span class="nm">5_000_000</span>)   <span class="cm"># → 45M < 50M: OK</span>
+nv.tangLuong(<span class="nm">10_000_000</span>)  <span class="cm"># → 75M > 50M: Cảnh báo</span></pre>
+      </div>
+      <div class="output-block">
+        <div class="output-label">▶ Kết quả</div>
+        <pre>╔══════════════════════════════════════╗
+║        THÔNG TIN NHÂN VIÊN           ║
+╠══════════════════════════════════════╣
+║ Tên       : Nguyễn Văn A             ║
+║ Lương CB  :           10,000,000 VNĐ ║
+║ Hệ số     :                      3.0 ║
+║ Lương TT  :           30,000,000 VNĐ ║
+╚══════════════════════════════════════╝
+✅ Đã tăng lương! Lương mới: 45,000,000 VNĐ
+⚠️  Lương mới (75,000,000) vượt LUONG_MAX. Không tăng!</pre>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function toggle(id) {
+  const card = document.getElementById(id);
+  card.classList.toggle('open');
+}
+
+function copyCode(id) {
+  const el = document.getElementById(id);
+  // Extract plain text from the highlighted pre
+  const text = el.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = el.closest('.code-wrap').querySelector('.copy-btn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    btn.style.color = '#3fb950';
+    setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 1500);
+  });
+}
+</script>
+</body>
+</html>
