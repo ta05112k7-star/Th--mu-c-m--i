@@ -1,0 +1,3 @@
+Hang_Dien_may('1532', 'Điều hòa', 'Daikin','16000000')
+Hang_Sanh_su('2143', 'Bát sứ cao cấp', 'Gốm sứ Bát Tràng','500000')
+Hang_Thuc_pham('3152', 'Ức gà tươi', 'Mealdeli','70000')
