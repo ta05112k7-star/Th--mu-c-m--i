@@ -1,0 +1,25 @@
+[
+  {
+    "ho_ten": "An",
+    "tuoi": 30,
+    "gioi_tinh": "Nam",
+    "dia_chi": "Hà Nam",
+    "loai": "Can_bo"
+  },
+  {
+    "ho_ten": "Tuấn",
+    "tuoi": 32,
+    "gioi_tinh": "Nam",
+    "dia_chi": "Hà Nội",
+    "loai": "Cong_nhan",
+    "bac": 5
+  },
+  {
+    "ho_ten": "NVTA",
+    "tuoi": 11,
+    "gioi_tinh": "Nam",
+    "dia_chi": "Hà Nội",
+    "loai": "Cong_nhan",
+    "bac": 4
+  }
+]
